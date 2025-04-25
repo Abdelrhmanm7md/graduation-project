@@ -1,0 +1,41 @@
+{
+  "name": "graduation-project",
+  "version": "1.0.0",
+  "description": "Follow these steps to get the server up and running:\r   1) Install Node.js & MongoDB on your machine if you haven't already.\r   2) Install the required dependencies: npm install\r   3) In terminal, run the server by typing: npm run start",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Abdelrhman Mohammed",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.0",
+    "fast-csv": "^5.0.2",
+    "fs": "^0.0.1-security",
+    "fs-extra": "^11.3.0",
+    "generate-unique-id": "^2.0.3",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "multer": "^1.4.5-lts.2",
+    "nodemailer": "^6.10.0",
+    "nodemon": "^3.1.9",
+    "socket.io": "^4.8.1",
+    "xss": "^1.0.15"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0"
+  }
+}
