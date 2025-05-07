@@ -64,8 +64,8 @@ const prediction = catchAsync(async (req, res) => {
 
   try {
     const results = await Promise.all([
-      runPythonScript("/root/graduation-project/process.py"),
-      runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
+      runPythonScript("process.py"),
+      runPythonScript("AlzhimerProcess.py"),
     ]);
 
     res.json({ message: "File uploaded and processed successfully", results });
