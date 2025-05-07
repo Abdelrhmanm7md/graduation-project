@@ -44,7 +44,7 @@ const prediction = catchAsync(async (req, res) =>  {
   
   console.log("Renamed file path:", newPath);
   let results = []
-    execFile("python", ["process.py", newPath], (error, stdout, stderr) => {
+    execFile("python", ["sftp://root@69.62.121.22/root/graduation-project/process.py", newPath], (error, stdout, stderr) => {
       if (error) {
         console.error("خطأ في سكريبت البايثون:", stderr);
         return res.status(500).json({ error: "فشل في المعالجة" });
@@ -59,7 +59,7 @@ const prediction = catchAsync(async (req, res) =>  {
         res.status(500).json({ error: "تنسيق الإخراج غير صالح" });
       }
     });
-     execFile("python", ["AlzhimerProcess.py", newPath], (error, stdout, stderr) => {
+     execFile("python", ["sftp://root@69.62.121.22/root/graduation-project/AlzhimerProcess.py", newPath], (error, stdout, stderr) => {
       if (error) {
         console.error("2خطأ في سكريبت البايثون:", stderr);
         return res.status(500).json({ error: "2فشل في المعالجة" });
