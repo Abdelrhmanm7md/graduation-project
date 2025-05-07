@@ -48,7 +48,9 @@ const prediction = catchAsync(async (req, res) => {
       execFile("python", [scriptPath, newPath], (error, stdout, stderr) => {
         if (error) {
           console.error(`خطأ في سكريبت ${scriptPath}:`, stderr); // اطبع الخطأ الفعلي هنا
-          return reject(new Error(`فشل في المعالجة من ${scriptPath}: ${stderr}`));
+          return reject(
+            new Error(`فشل في المعالجة من ${scriptPath}: ${stderr}`)
+          );
         }
         try {
           const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
@@ -56,7 +58,7 @@ const prediction = catchAsync(async (req, res) => {
           resolve(result);
         } catch (parseErr) {
           console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
-          reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath}`));
+          reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath} : ${parseErr}`));
         }
       });
     });
@@ -64,8 +66,12 @@ const prediction = catchAsync(async (req, res) => {
 
   try {
     const results = await Promise.all([
-      runPythonScript("process.py"),
-      runPythonScript("AlzhimerProcess.py"),
+      runPythonScript(
+        "sftp://root@69.62.121.22/root/graduation-project/process.py"
+      ),
+      runPythonScript(
+        "sftp://root@69.62.121.22/root/graduation-project/AlzhimerProcess.py"
+      ),
     ]);
 
     res.json({ message: "File uploaded and processed successfully", results });
