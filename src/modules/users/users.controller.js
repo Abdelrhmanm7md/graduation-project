@@ -45,7 +45,7 @@ const prediction = catchAsync(async (req, res) => {
 
   const runPythonScript = (scriptPath) => {
     return new Promise((resolve, reject) => {
-      execFile("python", [scriptPath, newPath], (error, stdout, stderr) => {
+      execFile("python3", [scriptPath, newPath], (error, stdout, stderr) => {
         console.log("stdout:", stdout);
         console.error("stderr:", stderr);
   
