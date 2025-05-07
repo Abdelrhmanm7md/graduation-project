@@ -47,8 +47,8 @@ const prediction = catchAsync(async (req, res) => {
     return new Promise((resolve, reject) => {
       execFile("python", [scriptPath, newPath], (error, stdout, stderr) => {
         if (error) {
-          console.error(`خطأ في سكريبت ${scriptPath}:`, stderr);
-          return reject(new Error(`فشل في المعالجة من ${scriptPath}`));
+          console.error(`خطأ في سكريبت ${scriptPath}:`, stderr); // اطبع الخطأ الفعلي هنا
+          return reject(new Error(`فشل في المعالجة من ${scriptPath}: ${stderr}`));
         }
         try {
           const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
