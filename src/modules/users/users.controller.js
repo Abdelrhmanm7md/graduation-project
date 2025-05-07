@@ -2,8 +2,8 @@ import { userModel } from "../../../database/models/user.model.js";
 import ApiFeature from "../../utils/apiFeature.js";
 import catchAsync from "../../utils/middleWare/catchAsyncError.js";
 import { execFile } from "child_process";
-import path from 'path';
-import fs from 'fs';
+import path from "path";
+import fs from "fs";
 
 const getAllUsersByAdmin = catchAsync(async (req, res, next) => {
   let ApiFeat = new ApiFeature(userModel.find(), req.query);
@@ -36,7 +36,10 @@ const getUserById = catchAsync(async (req, res, next) => {
 const prediction = catchAsync(async (req, res) => {
   const extension = path.extname(req.file.originalname);
   const oldPath = req.file.path;
-  const newPath = path.join(req.file.destination, req.file.filename + extension);
+  const newPath = path.join(
+    req.file.destination,
+    req.file.filename + extension
+  );
   fs.renameSync(oldPath, newPath);
   console.log("Renamed file path:", newPath);
 
@@ -61,8 +64,8 @@ const prediction = catchAsync(async (req, res) => {
 
   try {
     const results = await Promise.all([
-      runPythonScript("root/graduation-project/process.py"),
-      runPythonScript("root/graduation-project/AlzhimerProcess.py")
+      runPythonScript("/root/graduation-project/process.py"),
+      runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
     ]);
 
     res.json({ message: "File uploaded and processed successfully", results });
@@ -70,7 +73,6 @@ const prediction = catchAsync(async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 const updateUser = catchAsync(async (req, res, next) => {
   let { id } = req.params;
@@ -111,4 +113,4 @@ const deleteUser = catchAsync(async (req, res, next) => {
   res.status(200).json({ message: message_2 });
 });
 
-export { getAllUsersByAdmin, getUserById,prediction, updateUser, deleteUser };
+export { getAllUsersByAdmin, getUserById, prediction, updateUser, deleteUser };
