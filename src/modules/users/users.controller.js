@@ -33,49 +33,44 @@ const getUserById = catchAsync(async (req, res, next) => {
   let lastSignIn = req.lastSignIn;
   results && res.json({ message: "Done", results, lastSignIn });
 });
-const prediction = catchAsync(async (req, res) =>  {
-
-  const extension = path.extname(req.file.originalname); // e.g., ".mat"
-  
-  const oldPath = req.file.path; // e.g., "uploads\\500b63db16972e239ddc89a00715a1f1"
+const prediction = catchAsync(async (req, res) => {
+  const extension = path.extname(req.file.originalname);
+  const oldPath = req.file.path;
   const newPath = path.join(req.file.destination, req.file.filename + extension);
-  
   fs.renameSync(oldPath, newPath);
-  
   console.log("Renamed file path:", newPath);
-  let results = []
-    execFile("python", ["root/graduation-project/process.py", newPath], (error, stdout, stderr) => {
-      if (error) {
-        console.error("خطأ في سكريبت البايثون:", stderr);
-        return res.status(500).json({ error: "فشل في المعالجة" });
-      }
-  
-      try {
+
+  const runPythonScript = (scriptPath) => {
+    return new Promise((resolve, reject) => {
+      execFile("python", [scriptPath, newPath], (error, stdout, stderr) => {
+        if (error) {
+          console.error(`خطأ في سكريبت ${scriptPath}:`, stderr);
+          return reject(new Error(`فشل في المعالجة من ${scriptPath}`));
+        }
+        try {
           const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
-        results.push(result);
-        console.log("نتائج المعالجة:", result);
-      } catch (parseErr) {
-        console.error("فشل في تحويل النتائج:", parseErr);
-        res.status(500).json({ error: "تنسيق الإخراج غير صالح" });
-      }
+          console.log(`نتائج المعالجة من ${scriptPath}:`, result);
+          resolve(result);
+        } catch (parseErr) {
+          console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
+          reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath}`));
+        }
+      });
     });
-     execFile("python", ["root/graduation-project/AlzhimerProcess.py", newPath], (error, stdout, stderr) => {
-      if (error) {
-        console.error("2خطأ في سكريبت البايثون:", stderr);
-        return res.status(500).json({ error: "2فشل في المعالجة" });
-      }
-  
-      try {
-        const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
-        results.push(result);
-        console.log("2 نتائج المعالجة:", result);
-        res.json({ message: "File uploaded and processed successfully", results });
-      } catch (parseErr) {
-        console.error("2فشل في تحويل النتائج:", parseErr);
-        res.status(500).json({ error: "2تنسيق الإخراج غير صالح" });
-      }
-    });
-  });
+  };
+
+  try {
+    const results = await Promise.all([
+      runPythonScript("root/graduation-project/process.py"),
+      runPythonScript("root/graduation-project/AlzhimerProcess.py")
+    ]);
+
+    res.json({ message: "File uploaded and processed successfully", results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 const updateUser = catchAsync(async (req, res, next) => {
   let { id } = req.params;
