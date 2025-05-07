@@ -58,7 +58,9 @@ const prediction = catchAsync(async (req, res) => {
           resolve(result);
         } catch (parseErr) {
           console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
-          reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath} : ${parseErr}`));
+          reject(
+            new Error(`تنسيق الإخراج غير صالح من ${scriptPath} : ${parseErr}`)
+          );
         }
       });
     });
@@ -66,12 +68,8 @@ const prediction = catchAsync(async (req, res) => {
 
   try {
     const results = await Promise.all([
-      runPythonScript(
-        "sftp://root@69.62.121.22/root/graduation-project/process.py"
-      ),
-      runPythonScript(
-        "sftp://root@69.62.121.22/root/graduation-project/AlzhimerProcess.py"
-      ),
+      runPythonScript("/root/graduation-project/process.py"),
+      runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
     ]);
 
     res.json({ message: "File uploaded and processed successfully", results });
