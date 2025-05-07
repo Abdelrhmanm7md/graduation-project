@@ -65,5 +65,5 @@ app.use(globalError);
 app.listen(process.env.PORT || 7000, () =>
   console.log(`Server is running on port ${process.env.PORT || 7000}!`)
 );
-httpServer.listen(8001);
+// httpServer.listen(8001);
 export const sio = io;
