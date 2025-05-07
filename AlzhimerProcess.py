@@ -167,7 +167,7 @@ def preprocess_and_extract_features(df):
     return df_features[SELECTED_FEATURES]
 
 # ---------- 3. التنبؤ باستخدام النموذج ----------
-def predict_with_model(features_df, model_path="root/graduation-project/alzheimers_model.pkl"):
+def predict_with_model(features_df, model_path="alzheimers_model.pkl"):
 # def predict_with_model(features_df, model_path="F:\\FCDS\\Graduation Project\\gradProject\\alzheimers_model.pkl"):
     model_data = joblib.load(model_path)
     model = model_data['model']
