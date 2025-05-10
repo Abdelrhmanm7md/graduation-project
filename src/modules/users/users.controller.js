@@ -74,8 +74,21 @@ const prediction = catchAsync(async (req, res) => {
       runPythonScript("/root/graduation-project/process.py"),
       runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
     ]);
+    const normalizedResults = results.map(result => {
+  const normalized = { ...result };
+  // Normalize probability keys
+  if (normalized.Prob_Control !== undefined) {
+    normalized.Prob_0 = normalized.Prob_Control;
+    delete normalized.Prob_Control;
+  }
+  if (normalized.Prob_Alzheimers !== undefined) {
+    normalized.Prob_1 = normalized.Prob_Alzheimers;
+    delete normalized.Prob_Alzheimers;
+  }
+  return normalized;
+});
 
-    res.json({ message: "File uploaded and processed successfully", results: results.flat() });
+    res.json({ message: "File uploaded and processed successfully", results: normalizedResults });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
