@@ -33,6 +33,8 @@ const getUserById = catchAsync(async (req, res, next) => {
   let lastSignIn = req.lastSignIn;
   results && res.json({ message: "Done", results, lastSignIn });
 });
+
+
 const prediction = catchAsync(async (req, res) => {
   const extension = path.extname(req.file.originalname);
   const oldPath = req.file.path;
@@ -73,7 +75,7 @@ const prediction = catchAsync(async (req, res) => {
       runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
     ]);
 
-    res.json({ message: "File uploaded and processed successfully", results });
+    res.json({ message: "File uploaded and processed successfully", results: results.flat() });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
