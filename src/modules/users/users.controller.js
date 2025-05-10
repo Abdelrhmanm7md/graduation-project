@@ -74,19 +74,25 @@ const prediction = catchAsync(async (req, res) => {
       runPythonScript("/root/graduation-project/process.py"),
       runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
     ]);
-    const normalizedResults = results.map(result => {
-  const normalized = { ...result };
-  // Normalize probability keys
-  if (normalized.Prob_Control !== undefined) {
-    normalized.Prob_0 = normalized.Prob_Control;
-    delete normalized.Prob_Control;
+const normalize = (result) => {
+  const item = Array.isArray(result) ? result[0] : result;
+
+  if (item.Prob_Control !== undefined) {
+    item.Prob_0 = item.Prob_Control;
+    delete item.Prob_Control;
   }
-  if (normalized.Prob_Alzheimers !== undefined) {
-    normalized.Prob_1 = normalized.Prob_Alzheimers;
-    delete normalized.Prob_Alzheimers;
+  if (item.Prob_Alzheimers !== undefined) {
+    item.Prob_1 = item.Prob_Alzheimers;
+    delete item.Prob_Alzheimers;
   }
-  return normalized;
-});
+
+  return item;
+};
+
+const normalizedResults = {
+  process: normalize(results[0]),
+  alzheimer: normalize(results[1]),
+};
 
     res.json({ message: "File uploaded and processed successfully", results: normalizedResults });
   } catch (err) {
