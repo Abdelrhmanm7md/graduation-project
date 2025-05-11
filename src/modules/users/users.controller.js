@@ -70,13 +70,14 @@ const predictionADHD = catchAsync(async (req, res) => {
   };  
 
   try {
-    const results = await runPythonScript("/root/graduation-project/process.py");
+    const result = await runPythonScript("/root/graduation-project/process.py");
 
-    res.json({ message: "File uploaded and processed successfully", results });
+    res.json({ message: "File uploaded and processed successfully", result });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 const predictionAlzheimer = catchAsync(async (req, res) => {
   const extension = path.extname(req.file.originalname);
   const oldPath = req.file.path;
@@ -112,24 +113,9 @@ const predictionAlzheimer = catchAsync(async (req, res) => {
   };  
 
   try {
-  const results = await runPythonScript("/root/graduation-project/AlzhimerProcess.py")
+  const result = await runPythonScript("/root/graduation-project/AlzhimerProcess.py")
 
-const normalize = (result) => {
-  const item = Array.isArray(result) ? result[0] : result;
-
-  if (item.Prob_Alzheimers !== undefined) {
-    item.Prob_1 = item.Prob_Alzheimers;
-    delete item.Prob_Alzheimers;
-  }
-
-  return item;
-};
-
-const normalizedResults = {
-  alzheimer: normalize(results[1]),
-};
-
-    res.json({ message: "File uploaded and processed successfully", results: normalizedResults });
+    res.json({ message: "File uploaded and processed successfully", result });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
