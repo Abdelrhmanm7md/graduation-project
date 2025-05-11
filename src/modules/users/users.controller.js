@@ -70,9 +70,7 @@ const predictionADHD = catchAsync(async (req, res) => {
   };  
 
   try {
-    const results = await Promise.all(
-      runPythonScript("/root/graduation-project/process.py"),
-    );
+    const results = await runPythonScript("/root/graduation-project/process.py");
 
     res.json({ message: "File uploaded and processed successfully", results });
   } catch (err) {
@@ -114,9 +112,8 @@ const predictionAlzheimer = catchAsync(async (req, res) => {
   };  
 
   try {
-    const results = await Promise.all(
-      runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
-    );
+  const results = await runPythonScript("/root/graduation-project/AlzhimerProcess.py")
+
 const normalize = (result) => {
   const item = Array.isArray(result) ? result[0] : result;
 
