@@ -70,8 +70,8 @@ const predictionADHD = catchAsync(async (req, res) => {
   };  
 
   try {
-    const result = await runPythonScript("/root/graduation-project/process.py");
-
+    const resultArray = await runPythonScript("/root/graduation-project/process.py");
+const result = Array.isArray(resultArray) ? resultArray[0] : resultArray;
     res.json({ message: "File uploaded and processed successfully", result });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -113,8 +113,8 @@ const predictionAlzheimer = catchAsync(async (req, res) => {
   };  
 
   try {
-  const result = await runPythonScript("/root/graduation-project/AlzhimerProcess.py")
-
+  const resultArray = await runPythonScript("/root/graduation-project/AlzhimerProcess.py")
+const result = Array.isArray(resultArray) ? resultArray[0] : resultArray;
     res.json({ message: "File uploaded and processed successfully", result });
   } catch (err) {
     res.status(500).json({ error: err.message });
