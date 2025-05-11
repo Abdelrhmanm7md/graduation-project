@@ -73,22 +73,8 @@ const predictionADHD = catchAsync(async (req, res) => {
     const results = await Promise.all(
       runPythonScript("/root/graduation-project/process.py"),
     );
-const normalize = (result) => {
-  const item = Array.isArray(result) ? result[0] : result;
 
-  if (item.Prob_Control !== undefined) {
-    item.Prob_0 = item.Prob_Control;
-    delete item.Prob_Control;
-  }
-
-  return item;
-};
-
-const normalizedResults = {
-  process: normalize(results[0]),
-};
-
-    res.json({ message: "File uploaded and processed successfully", results: normalizedResults });
+    res.json({ message: "File uploaded and processed successfully", results });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
