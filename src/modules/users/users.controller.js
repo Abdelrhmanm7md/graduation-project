@@ -35,7 +35,7 @@ const getUserById = catchAsync(async (req, res, next) => {
 });
 
 
-const prediction = catchAsync(async (req, res) => {
+const predictionADHD = catchAsync(async (req, res) => {
   const extension = path.extname(req.file.originalname);
   const oldPath = req.file.path;
   const newPath = path.join(
@@ -70,10 +70,9 @@ const prediction = catchAsync(async (req, res) => {
   };  
 
   try {
-    const results = await Promise.all([
+    const results = await Promise.all(
       runPythonScript("/root/graduation-project/process.py"),
-      runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
-    ]);
+    );
 const normalize = (result) => {
   const item = Array.isArray(result) ? result[0] : result;
 
@@ -81,6 +80,60 @@ const normalize = (result) => {
     item.Prob_0 = item.Prob_Control;
     delete item.Prob_Control;
   }
+
+  return item;
+};
+
+const normalizedResults = {
+  process: normalize(results[0]),
+};
+
+    res.json({ message: "File uploaded and processed successfully", results: normalizedResults });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+const predictionAlzheimer = catchAsync(async (req, res) => {
+  const extension = path.extname(req.file.originalname);
+  const oldPath = req.file.path;
+  const newPath = path.join(
+    req.file.destination,
+    req.file.filename + extension
+  );
+  fs.renameSync(oldPath, newPath);
+  console.log("Renamed file path:", newPath);
+
+  const runPythonScript = (scriptPath) => {
+    return new Promise((resolve, reject) => {
+      execFile("/root/graduation-project/venv/bin/python", [scriptPath, newPath], (error, stdout, stderr) => {
+        console.log("stdout:", stdout);
+        console.error("stderr:", stderr);
+  
+        if (error) {
+          console.error(`فشل تشغيل ${scriptPath}`);
+          console.error("تفاصيل الخطأ:", error);
+          return reject(new Error(`فشل في المعالجة من ${scriptPath}: ${stderr || error.message}`));
+        }
+  
+        try {
+          const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
+          console.log(`نتائج المعالجة من ${scriptPath}:`, result);
+          resolve(result);
+        } catch (parseErr) {
+          console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
+          reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath}`));
+        }
+      });
+    });
+  };  
+
+  try {
+    const results = await Promise.all(
+      runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
+    );
+const normalize = (result) => {
+  const item = Array.isArray(result) ? result[0] : result;
+
   if (item.Prob_Alzheimers !== undefined) {
     item.Prob_1 = item.Prob_Alzheimers;
     delete item.Prob_Alzheimers;
@@ -90,7 +143,6 @@ const normalize = (result) => {
 };
 
 const normalizedResults = {
-  process: normalize(results[0]),
   alzheimer: normalize(results[1]),
 };
 
@@ -139,4 +191,70 @@ const deleteUser = catchAsync(async (req, res, next) => {
   res.status(200).json({ message: message_2 });
 });
 
-export { getAllUsersByAdmin, getUserById, prediction, updateUser, deleteUser };
+export { getAllUsersByAdmin, getUserById, predictionADHD, predictionAlzheimer, updateUser, deleteUser };
+
+
+// const prediction = catchAsync(async (req, res) => {
+//   const extension = path.extname(req.file.originalname);
+//   const oldPath = req.file.path;
+//   const newPath = path.join(
+//     req.file.destination,
+//     req.file.filename + extension
+//   );
+//   fs.renameSync(oldPath, newPath);
+//   console.log("Renamed file path:", newPath);
+
+//   const runPythonScript = (scriptPath) => {
+//     return new Promise((resolve, reject) => {
+//       execFile("/root/graduation-project/venv/bin/python", [scriptPath, newPath], (error, stdout, stderr) => {
+//         console.log("stdout:", stdout);
+//         console.error("stderr:", stderr);
+  
+//         if (error) {
+//           console.error(`فشل تشغيل ${scriptPath}`);
+//           console.error("تفاصيل الخطأ:", error);
+//           return reject(new Error(`فشل في المعالجة من ${scriptPath}: ${stderr || error.message}`));
+//         }
+  
+//         try {
+//           const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
+//           console.log(`نتائج المعالجة من ${scriptPath}:`, result);
+//           resolve(result);
+//         } catch (parseErr) {
+//           console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
+//           reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath}`));
+//         }
+//       });
+//     });
+//   };  
+
+//   try {
+//     const results = await Promise.all([
+//       runPythonScript("/root/graduation-project/process.py"),
+//       runPythonScript("/root/graduation-project/AlzhimerProcess.py"),
+//     ]);
+// const normalize = (result) => {
+//   const item = Array.isArray(result) ? result[0] : result;
+
+//   if (item.Prob_Control !== undefined) {
+//     item.Prob_0 = item.Prob_Control;
+//     delete item.Prob_Control;
+//   }
+//   if (item.Prob_Alzheimers !== undefined) {
+//     item.Prob_1 = item.Prob_Alzheimers;
+//     delete item.Prob_Alzheimers;
+//   }
+
+//   return item;
+// };
+
+// const normalizedResults = {
+//   process: normalize(results[0]),
+//   alzheimer: normalize(results[1]),
+// };
+
+//     res.json({ message: "File uploaded and processed successfully", results: normalizedResults });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });

@@ -10,7 +10,8 @@ import { protectRoutes , allowTo } from "../auth/auth.controller.js";
 usersRouter.get("/",protectRoutes, usersController.getAllUsersByAdmin);
 
 usersRouter.get("/:id",protectRoutes, usersController.getUserById);
-usersRouter.post("/upload", upload.single("eegfile"), usersController.prediction);
+usersRouter.post("/upload/adhd", upload.single("eegfile"), usersController.predictionADHD);
+usersRouter.post("/upload/alzheimer", upload.single("eegfile"), usersController.predictionAlzheimer);
 
 
 usersRouter.put("/:id",protectRoutes, usersController.updateUser);
