@@ -92,7 +92,7 @@ function verifyToken(req, res, next) {
 }
 
 // ✅ Get Volunteers (Private Dashboard)
-app.get("/api/volunteers", verifyToken, async (req, res) => {
+app.get("/api/volunteers", async (req, res) => {
   try {
     const volunteers = await Volunteer.find().sort({ createdAt: -1 });
     res.json(volunteers);
