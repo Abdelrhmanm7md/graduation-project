@@ -4,13 +4,14 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-
+import * as dotenv from "dotenv";
+dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection (Change if needed)
-mongoose.connect("mongodb+srv://abdelrahmanmohammed851:boda12345@cluster0.o9chdll.mongodb.net/volunteerDB", {
+mongoose.connect(process.env.CONNECTIONSTRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
