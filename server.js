@@ -1,15 +1,16 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection (Change if needed)
-mongoose.connect("mongodb://localhost:27017/volunteerDB", {
+mongoose.connect("mongodb+srv://abdelrahmanmohammed851:boda12345@cluster0.o9chdll.mongodb.net/volunteerDB", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
