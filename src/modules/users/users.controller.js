@@ -43,26 +43,19 @@ const predictionADHD = catchAsync(async (req, res) => {
     req.file.filename + extension
   );
   fs.renameSync(oldPath, newPath);
-  console.log("Renamed file path:", newPath);
 
   const runPythonScript = (scriptPath) => {
     return new Promise((resolve, reject) => {
       execFile("/root/graduation-project/venv/bin/python", [scriptPath, newPath], (error, stdout, stderr) => {
-        console.log("stdout:", stdout);
-        console.error("stderr:", stderr);
   
         if (error) {
-          console.error(`فشل تشغيل ${scriptPath}`);
-          console.error("تفاصيل الخطأ:", error);
           return reject(new Error(`فشل في المعالجة من ${scriptPath}: ${stderr || error.message}`));
         }
   
         try {
           const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
-          console.log(`نتائج المعالجة من ${scriptPath}:`, result);
           resolve(result);
         } catch (parseErr) {
-          console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
           reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath}`));
         }
       });
@@ -78,6 +71,7 @@ const result = Array.isArray(resultArray) ? resultArray[0] : resultArray;
   }
 });
 
+
 const predictionAlzheimer = catchAsync(async (req, res) => {
   const extension = path.extname(req.file.originalname);
   const oldPath = req.file.path;
@@ -86,26 +80,19 @@ const predictionAlzheimer = catchAsync(async (req, res) => {
     req.file.filename + extension
   );
   fs.renameSync(oldPath, newPath);
-  console.log("Renamed file path:", newPath);
 
   const runPythonScript = (scriptPath) => {
     return new Promise((resolve, reject) => {
       execFile("/root/graduation-project/venv/bin/python", [scriptPath, newPath], (error, stdout, stderr) => {
-        console.log("stdout:", stdout);
-        console.error("stderr:", stderr);
-  
+
         if (error) {
-          console.error(`فشل تشغيل ${scriptPath}`);
-          console.error("تفاصيل الخطأ:", error);
           return reject(new Error(`فشل في المعالجة من ${scriptPath}: ${stderr || error.message}`));
         }
   
         try {
           const result = JSON.parse(stdout.split("###RESULT###")[1].trim());
-          console.log(`نتائج المعالجة من ${scriptPath}:`, result);
           resolve(result);
         } catch (parseErr) {
-          console.error(`فشل في تحويل النتائج من ${scriptPath}:`, parseErr);
           reject(new Error(`تنسيق الإخراج غير صالح من ${scriptPath}`));
         }
       });

@@ -144,10 +144,10 @@ def preprocess_and_extract_features(df):
     df_features.fillna(0.0, inplace=True)  # التأكد من عدم وجود NaN بعد الحسابات
     return df_features[SELECTED_FEATURES]
 
+# def predict_with_model(features_df, model_path="F:\\FCDS\\Graduation Project\\gradProject\\adhd_combined_model.pkl"):
 
 # ---------- 3. التنبؤ باستخدام النموذج ----------
 def predict_with_model(features_df, model_path="adhd_combined_model.pkl"):
-# def predict_with_model(features_df, model_path="F:\\FCDS\\Graduation Project\\gradProject\\adhd_combined_model.pkl"):
     model_data = joblib.load(model_path)
     model = model_data['model']
     expected_features = model_data['feature_names']

@@ -1,69 +1,105 @@
-import * as dotenv from "dotenv";
-dotenv.config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import cors from "cors";
-import dbConnection from "./database/DBConnection.js";
-import { init } from "./src/modules/index.js";
-import { globalError } from "./src/utils/middleWare/globalError.js";
-import { rateLimit } from 'express-rate-limit'
-
-import mongoSanitize from "express-mongo-sanitize";
-import hpp from "hpp";
-import helmet from "helmet";
-import xssSanitizer from "./src/utils/middleWare/sanitization.js";
-const httpServer = createServer();
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-    rejectUnauthorized: false,
-  },
-});
 const app = express();
-
-const corsOptions = {
-  origin: "*", // frontend IP + port
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
-app.use(hpp());  // Prevent HTTP Parameter Pollution  --> in case of query string parameters
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("uploads"));
-app.use(mongoSanitize());
-app.use(xssSanitizer);
-app.use(helmet());
 
-// const limiter = rateLimit({
-// 	windowMs: 15 * 60 * 1000, // 15 minutes
-// 	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-//   message: 'Too many requests from this IP, please try again after an hour',
-//   // standardHeaders: true, // Send rate limit info in headers
-//   // legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-//   handler: (req, res) => {
-//     res.status(429).json({ error: 'Too many requests from this IP, please try again after an hour' });
-//   }
-// })
+// ✅ MongoDB Connection (Change if needed)
+mongoose.connect("mongodb://localhost:27017/volunteerDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Connected to MongoDB"))
+.catch(err => console.error("❌ MongoDB Connection Error:", err));
 
-// // Apply the rate limiting middleware to all requests.
-// app.use("/api",limiter)
-dbConnection();
-app.use((err, req, res, next) => {
-  if (err.code === 'ENOTFOUND') {
-    return res.status(500).send('Network error, please try again later.');
+// ✅ Volunteer Schema & Model
+const Volunteer = mongoose.model("Volunteer", new mongoose.Schema({
+  fullName: { type: String, required: true },
+  nationalId: { type: String, required: true },
+  birthDate: { type: String, required: true },
+  age: { type: Number, required: true },
+  phoneNumber: { type: String, required: true },
+  education: { type: String, required: true },
+  volunteerType: { type: String, required: true },
+  monthlyDays: { type: String, required: true },
+  previousExperience: { type: String, required: true },
+  availableDays: [String],
+  innovativeIdeas: String,
+  createdAt: { type: Date, default: Date.now }
+}));
+
+// ✅ Admin Schema & Model
+const Admin = mongoose.model("Admin", new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true }
+}));
+
+// ✅ Create Default Admin (Only once)
+(async () => {
+  const adminExists = await Admin.findOne({ email: "admin@email.com" });
+  if (!adminExists) {
+    const hashed = await bcrypt.hash("123456", 10);
+    await Admin.create({ email: "admin@email.com", password: hashed });
+    // console.log("✅ Default admin created: email=admin@email.com | password=123456");
   }
-  res.status(500).send(err.message);
+})();
+
+// ✅ Submit Volunteer (Public Website)
+app.post("/api/volunteers", async (req, res) => {
+  try {
+    const volunteer = new Volunteer(req.body);
+    await volunteer.save();
+    res.json({ success: true, message: "تم حفظ طلب التطوع بنجاح" });
+  } catch (err) {
+    console.error("❌ Error saving volunteer:", err);
+    res.status(500).json({ success: false, message: "حدث خطأ أثناء حفظ البيانات" });
+  }
 });
-init(app);
-app.use(globalError);
 
+// ✅ Admin Login (Private Dashboard)
+app.post("/api/login", async (req, res) => {
+  try {
+    const admin = await Admin.findOne({ email: req.body.email });
+    if (!admin) return res.status(400).json({ message: "البريد الإلكتروني غير صحيح" });
 
+    const valid = await bcrypt.compare(req.body.password, admin.password);
+    if (!valid) return res.status(400).json({ message: "كلمة المرور غير صحيحة" });
 
-app.listen(process.env.PORT || 7000, () =>
-  console.log(`Server is running on port ${process.env.PORT || 7000}!`)
-);
-// httpServer.listen(8001);
-export const sio = io;
+    const token = jwt.sign({ id: admin._id }, "SECRET123", { expiresIn: "2h" });
+    res.json({ token });
+  } catch (err) {
+    console.error("❌ Login error:", err);
+    res.status(500).json({ message: "حدث خطأ أثناء تسجيل الدخول" });
+  }
+});
+
+// ✅ Middleware to Verify Admin Token
+function verifyToken(req, res, next) {
+  const token = req.headers["authorization"];
+  if (!token) return res.status(401).json({ message: "يجب تسجيل الدخول أولاً" });
+
+  jwt.verify(token, "SECRET123", (err, decoded) => {
+    if (err) return res.status(403).json({ message: "رمز الدخول غير صالح" });
+    req.adminId = decoded.id;
+    next();
+  });
+}
+
+// ✅ Get Volunteers (Private Dashboard)
+app.get("/api/volunteers", verifyToken, async (req, res) => {
+  try {
+    const volunteers = await Volunteer.find().sort({ createdAt: -1 });
+    res.json(volunteers);
+  } catch (err) {
+    console.error("❌ Error fetching volunteers:", err);
+    res.status(500).json({ message: "حدث خطأ أثناء جلب البيانات" });
+  }
+});
+
+// ✅ Start Server
+const PORT = 8000;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
