@@ -55,5 +55,5 @@ const httpsOptions = {
 };
 
 https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`✅ HTTPS Server running on https://69.62.121.22:${PORT}`);
+  console.log(`✅ HTTPS Server running on :${PORT}`);
 });
